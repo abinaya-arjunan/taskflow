@@ -1,7 +1,7 @@
-// App.tsx — Day 4: Dashboard + FilterBar added
+// App.tsx — Day 5: dark/light toggle, mobile classes, footer
 
 import { useState, useEffect, useMemo } from "react";
-import { Task, UpdateTaskInput, CreateTaskInput, Status, Priority } from "../../shared/types";
+import { Task, UpdateTaskInput, CreateTaskInput, Status } from "../../shared/types";
 import { fetchTasks, createTask, updateTask, deleteTask } from "./api";
 import TaskCard    from "./components/TaskCard";
 import AddTaskForm from "./components/AddTaskForm";
@@ -16,13 +16,20 @@ const DEFAULT_FILTERS: FilterState = {
 };
 
 function App() {
-  const [tasks,   setTasks]   = useState<Task[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error,   setError]   = useState<string | null>(null);
-  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const [tasks,    setTasks]    = useState<Task[]>([]);
+  const [loading,  setLoading]  = useState<boolean>(true);
+  const [error,    setError]    = useState<string | null>(null);
+  const [filters,  setFilters]  = useState<FilterState>(DEFAULT_FILTERS);
   const [showDash, setShowDash] = useState<boolean>(true);
+  const [darkMode, setDarkMode] = useState<boolean>(true);
 
   useEffect(() => { loadTasks(); }, []);
+
+  function toggleTheme() {
+    const next = !darkMode;
+    setDarkMode(next);
+    document.documentElement.setAttribute("data-theme", next ? "dark" : "light");
+  }
 
   async function loadTasks() {
     try {
@@ -52,7 +59,6 @@ function App() {
     setTasks((prev) => prev.filter((t) => t.id !== id));
   }
 
-  // Apply filters using useMemo — only recalculates when tasks or filters change
   const filteredTasks = useMemo(() => {
     return tasks.filter((t) => {
       const matchSearch   = t.title.toLowerCase().includes(filters.search.toLowerCase());
@@ -67,13 +73,18 @@ function App() {
   const doneTasks       = filteredTasks.filter((t) => t.status === Status.Done);
 
   return (
-    <div style={styles.wrapper}>
+    <div className="app-wrapper" style={styles.wrapper}>
 
       {/* HEADER */}
       <header style={styles.header}>
-        <h1 style={styles.logo}>
-          <span style={{ color: "var(--accent)" }}>Task</span>Flow
-        </h1>
+        <div style={styles.headerTop}>
+          <h1 className="app-logo" style={styles.logo}>
+            <span style={{ color: "var(--accent)" }}>Task</span>Flow
+          </h1>
+          <button onClick={toggleTheme} style={styles.themeBtn} title="Toggle theme">
+            {darkMode ? "☀️" : "🌙"}
+          </button>
+        </div>
         <p style={styles.tagline}>Full Stack TypeScript Task Manager</p>
       </header>
 
@@ -85,7 +96,7 @@ function App() {
       {/* DASHBOARD TOGGLE */}
       {tasks.length > 0 && (
         <button onClick={() => setShowDash((v) => !v)} style={styles.toggleBtn}>
-          {showDash ? "Hide Dashboard" : "Show Dashboard"}
+          {showDash ? "Hide Dashboard ▲" : "Show Dashboard ▼"}
         </button>
       )}
 
@@ -94,11 +105,7 @@ function App() {
 
       {/* FILTER BAR */}
       {tasks.length > 0 && (
-        <FilterBar
-          filters={filters}
-          onChange={setFilters}
-          taskCount={filteredTasks.length}
-        />
+        <FilterBar filters={filters} onChange={setFilters} taskCount={filteredTasks.length} />
       )}
 
       {/* LOADING */}
@@ -122,12 +129,20 @@ function App() {
 
       {/* TASK COLUMNS */}
       {!loading && !error && tasks.length > 0 && (
-        <div style={styles.columns}>
-          <TaskColumn title="📋 Todo"        tasks={todoTasks}       onUpdate={handleUpdate} onDelete={handleDelete} />
-          <TaskColumn title="⚡ In Progress"  tasks={inProgressTasks} onUpdate={handleUpdate} onDelete={handleDelete} />
-          <TaskColumn title="✅ Done"         tasks={doneTasks}       onUpdate={handleUpdate} onDelete={handleDelete} />
+        <div className="task-columns" style={styles.columns}>
+          <TaskColumn title="📋 Todo"       tasks={todoTasks}       onUpdate={handleUpdate} onDelete={handleDelete} />
+          <TaskColumn title="⚡ In Progress" tasks={inProgressTasks} onUpdate={handleUpdate} onDelete={handleDelete} />
+          <TaskColumn title="✅ Done"        tasks={doneTasks}       onUpdate={handleUpdate} onDelete={handleDelete} />
         </div>
       )}
+
+      {/* FOOTER */}
+      <footer style={styles.footer}>
+        Built with React + TypeScript + Express &nbsp;·&nbsp;
+        <a href="https://github.com/abinaya-arjunan/taskflow" target="_blank" rel="noopener noreferrer">
+          View on GitHub
+        </a>
+      </footer>
 
     </div>
   );
@@ -160,23 +175,26 @@ function TaskColumn({ title, tasks, onUpdate, onDelete }: TaskColumnProps) {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  wrapper:     { maxWidth: "1100px", margin: "0 auto", padding: "40px 16px 60px" },
-  header:      { textAlign: "center", marginBottom: "32px" },
-  logo:        { fontSize: "36px", fontWeight: 700, letterSpacing: "-1px", marginBottom: "6px" },
-  tagline:     { fontSize: "14px", color: "var(--muted)" },
-  formWrapper: { maxWidth: "480px", margin: "0 auto 24px" },
-  toggleBtn:   { display: "block", margin: "0 auto 16px", background: "transparent", border: "1px solid var(--border)", color: "var(--muted)", borderRadius: "6px", padding: "6px 16px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit" },
-  message:     { textAlign: "center", color: "var(--muted)", fontSize: "14px", padding: "40px 0" },
-  errorBox:    { background: "rgba(248,81,73,0.1)", border: "1px solid rgba(248,81,73,0.3)", borderRadius: "10px", padding: "20px", textAlign: "center", color: "#f85149", fontSize: "13px" },
-  retryBtn:    { marginTop: "10px", background: "transparent", border: "1px solid #f85149", color: "#f85149", borderRadius: "6px", padding: "6px 16px", cursor: "pointer", fontFamily: "inherit", fontSize: "12px" },
-  empty:       { display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", padding: "60px 0" },
-  columns:     { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px", alignItems: "start" },
-  column:      { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "12px", overflow: "hidden" },
-  columnHeader:{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", borderBottom: "1px solid var(--border)", background: "var(--bg)" },
-  columnTitle: { fontSize: "13px", fontWeight: 600, color: "var(--text)" },
-  columnCount: { background: "var(--border)", color: "var(--muted)", fontSize: "11px", padding: "2px 8px", borderRadius: "10px" },
-  columnBody:  { padding: "12px", display: "flex", flexDirection: "column", gap: "10px", minHeight: "100px" },
-  emptyColumn: { fontSize: "12px", color: "var(--muted)", textAlign: "center", padding: "20px 0" },
+  wrapper:      { maxWidth: "1100px", margin: "0 auto", padding: "40px 16px 60px" },
+  header:       { textAlign: "center", marginBottom: "32px" },
+  headerTop:    { display: "flex", justifyContent: "center", alignItems: "center", gap: "12px", marginBottom: "6px", position: "relative" },
+  logo:         { fontSize: "36px", fontWeight: 700, letterSpacing: "-1px" },
+  themeBtn:     { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "8px", padding: "6px 10px", fontSize: "18px", cursor: "pointer", position: "absolute", right: 0 },
+  tagline:      { fontSize: "14px", color: "var(--muted)" },
+  formWrapper:  { maxWidth: "480px", margin: "0 auto 24px" },
+  toggleBtn:    { display: "block", margin: "0 auto 16px", background: "transparent", border: "1px solid var(--border)", color: "var(--muted)", borderRadius: "6px", padding: "6px 16px", fontSize: "12px", cursor: "pointer" },
+  message:      { textAlign: "center", color: "var(--muted)", fontSize: "14px", padding: "40px 0" },
+  errorBox:     { background: "rgba(248,81,73,0.1)", border: "1px solid rgba(248,81,73,0.3)", borderRadius: "10px", padding: "20px", textAlign: "center", color: "#f85149", fontSize: "13px" },
+  retryBtn:     { marginTop: "10px", background: "transparent", border: "1px solid #f85149", color: "#f85149", borderRadius: "6px", padding: "6px 16px", cursor: "pointer", fontSize: "12px" },
+  empty:        { display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", padding: "60px 0" },
+  columns:      { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px", alignItems: "start" },
+  column:       { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "12px", overflow: "hidden" },
+  columnHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", borderBottom: "1px solid var(--border)", background: "var(--bg)" },
+  columnTitle:  { fontSize: "13px", fontWeight: 600, color: "var(--text)" },
+  columnCount:  { background: "var(--border)", color: "var(--muted)", fontSize: "11px", padding: "2px 8px", borderRadius: "10px" },
+  columnBody:   { padding: "12px", display: "flex", flexDirection: "column", gap: "10px", minHeight: "100px" },
+  emptyColumn:  { fontSize: "12px", color: "var(--muted)", textAlign: "center", padding: "20px 0" },
+  footer:       { marginTop: "60px", textAlign: "center", fontSize: "12px", color: "var(--muted)" },
 };
 
 export default App;
