@@ -10,10 +10,14 @@ exports.readTasks = readTasks;
 exports.writeTasks = writeTasks;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
-const DB_PATH = path_1.default.join(__dirname, "../../data/tasks.json");
+const DB_PATH = path_1.default.join(__dirname, "../../../data/tasks.json");
 // Read all tasks from the JSON file
 function readTasks() {
     try {
+        const dbFolder = path_1.default.dirname(DB_PATH);
+        if (!fs_1.default.existsSync(dbFolder)) {
+            fs_1.default.mkdirSync(dbFolder, { recursive: true });
+        }
         if (!fs_1.default.existsSync(DB_PATH)) {
             fs_1.default.writeFileSync(DB_PATH, "[]", "utf-8");
         }
