@@ -108,11 +108,11 @@ router.patch("/:id", (req: Request, res: Response) => {
       ...body,
       // If status is being set to Done, record completedAt
       completedAt:
-        body.status === Status.Done
-          ? new Date().toISOString()
-          : body.status && body.status !== Status.Done
-          ? null
-          : tasks[index].completedAt,
+  body.status === Status.Done
+    ? new Date().toISOString()
+    : body.status !== undefined
+    ? null
+    : tasks[index].completedAt,
     };
 
     tasks[index] = updated;
