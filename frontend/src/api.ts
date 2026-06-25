@@ -3,7 +3,7 @@
 
 import { Task, CreateTaskInput, UpdateTaskInput, ApiResponse } from "../../shared/types";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+const BASE_URL = import.meta.env.VITE_API_URL || "https://taskflow-7c5n.onrender.com";
 
 // ── GET all tasks ──
 export async function fetchTasks(): Promise<Task[]> {
