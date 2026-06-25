@@ -1,3 +1,4 @@
+/* ── RESET & BASE ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -14,11 +15,75 @@
   --font:    'Segoe UI', system-ui, sans-serif;
 }
 
+[data-theme="light"] {
+  --bg:      #ffffff;
+  --surface: #f6f8fa;
+  --border:  #d0d7de;
+  --text:    #1f2328;
+  --muted:   #656d76;
+  --accent:  #0969da;
+  --green:   #1a7f37;
+  --red:     #cf222e;
+  --amber:   #9a6700;
+  --purple:  #8250df;
+}
+
 body {
-  background: var(--bg);
-  color: var(--text);
+  background:  var(--bg);
+  color:       var(--text);
   font-family: var(--font);
-  min-height: 100vh;
+  min-height:  100vh;
+  transition:  background 0.2s, color 0.2s;
+  animation:   fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
 }
 
 a { color: var(--accent); }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+input, select, textarea, button { font-family: var(--font); }
+
+/* ══════════════════
+   MOBILE RESPONSIVE
+   ══════════════════ */
+@media (max-width: 768px) {
+  .task-columns {
+    grid-template-columns: 1fr !important;
+  }
+  .charts-row {
+    grid-template-columns: 1fr !important;
+  }
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .filter-wrapper {
+    flex-direction: column !important;
+    align-items:    stretch !important;
+  }
+  .filter-wrapper input,
+  .filter-wrapper select {
+    width: 100% !important;
+  }
+  .form-row {
+    flex-direction: column !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-wrapper {
+    padding: 20px 12px 40px !important;
+  }
+  .app-logo {
+    font-size: 28px !important;
+  }
+  .dashboard-wrapper {
+    padding: 16px !important;
+  }
+}
